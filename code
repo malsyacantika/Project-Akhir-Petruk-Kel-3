@@ -2,6 +2,24 @@
 #include <vector>
 #include <string>
 #include <iomanip>
-
 using namespace std;
+
+struct Film {
+    string nama;
+    vector<string> jamTayang;
+    int kursi[ROWS][COLS] = {0}; 
+
+    Film() = default;
+    Film(string n, vector<string> t) : nama(n), jamTayang(t) {} 
+};
+
+unordered_map<int, Film> jadwal;
+
+void inisialisasiJadwal() {
+    jadwal[1] = Film("Haikyu!! The Dumpster Battle", {"13:25", "15:05", "16:45", "18:25"});
+    jadwal[2] = Film("How to Make Millions Before Grandma Dies", {"13:05", "15:30", "17:55", "20:20"});
+    jadwal[3] = Film("The Garfield Movie", {"12:15", "14:15", "16:15", "18:15"});
+    jadwal[4] = Film("Tuhan Izinkan Aku Berdosa", {"12:05", "16:20", "18:35", "20:50"});
+    jadwal[5] = Film("Vina: Sebelum 7 Hari", {"14:20", "16:50"});
+}
 
