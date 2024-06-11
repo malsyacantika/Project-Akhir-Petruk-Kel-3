@@ -4,6 +4,12 @@
 #include <iomanip>
 using namespace std;
 
+const int ROWS = 13; 
+const int COLS = 15; 
+
+unordered_map<string, string> pengguna;
+unordered_map<string, vector<string>> pemesanan;
+
 struct Film {
     string nama;
     vector<string> jamTayang;
