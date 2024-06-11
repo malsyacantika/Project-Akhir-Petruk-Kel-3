@@ -5,10 +5,11 @@
 #include <unordered_map>
 #include <sstream>
 #include <algorithm>
+
 using namespace std;
 
-const int ROWS = 13; 
-const int COLS = 15; 
+const int ROWS = 12; 
+const int COLS = 17; 
 
 unordered_map<string, string> pengguna;
 unordered_map<string, vector<string>> pemesanan;
@@ -16,14 +17,18 @@ unordered_map<string, vector<string>> pemesanan;
 struct Film {
     string nama;
     vector<string> jamTayang;
-    int kursi[ROWS][COLS] = {0}; 
+    int kursi[ROWS][COLS] = {0};
 
     Film() = default;
-    Film(string n, vector<string> t) : nama(n), jamTayang(t) {} 
+    Film(string n, vector<string> t) : nama(n), jamTayang(t) {
+        for (int i = 0; i < ROWS; ++i) {
+            for (int j = 0; j < COLS; ++j) {
+                kursi[i][j] = 0;
+            }
+        }
+    }
 };
-
 unordered_map<int, Film> jadwal;
-
 void inisialisasiJadwal() {
     jadwal[1] = Film("Haikyu!! The Dumpster Battle", {"13:25", "15:05", "16:45", "18:25"});
     jadwal[2] = Film("How to Make Millions Before Grandma Dies", {"13:05", "15:30", "17:55", "20:20"});
@@ -32,3 +37,338 @@ void inisialisasiJadwal() {
     jadwal[5] = Film("Vina: Sebelum 7 Hari", {"14:20", "16:50"});
 }
 
+void inisialisasiPengguna() {
+    pengguna["admin"] = "admin123"; 
+
+void clearScreen() {
+#ifdef _WIN32
+    system("CLS");
+#else
+    system("clear");
+#endif
+}
+
+void waitForEnter() {
+    cout << "Tekan Enter untuk melanjutkan...";
+    cin.ignore();
+    cin.get();
+}
+
+void tampilkanKursi(int kursi[ROWS][COLS]) {
+    cout << "-------------------------------------------------------" << endl;
+    cout << "     ";
+    for (int j = 1; j <= COLS; ++j) {
+        cout << setw(2) << j << " ";
+    }
+    cout << endl;
+    for (int i = 0; i < ROWS; ++i) {
+        cout << static_cast<char>('A' + i) << " ";
+        for (int j = 0; j < COLS; ++j) {
+            cout << (kursi[i][j] == 0 ? "[ ]" : "[X]") << " ";
+        }
+        cout << endl;
+    }
+    cout << "-------------------------------------------------------" << endl;
+    cout << "Catatan:" << endl;
+    cout << "[ ] = Kursi Kosong" << endl;
+    cout << "[X] = Kursi Sudah Ditempati" << endl;
+    cout << "=======================================================" << endl;
+}
+
+bool daftarPengguna() {
+    string username, password;
+    clearScreen();
+    cout << "=======================================================" << endl;
+    cout << "Registrasi" << endl;
+    cout << "=======================================================" << endl;
+    cout << "Masukkan username: ";
+    cin >> username;
+    cout << "Masukkan password: ";
+    cin >> password;
+    if (pengguna.find(username) == pengguna.end()) {
+        pengguna[username] = password;
+        cout << "Registrasi berhasil!" << endl;
+        cout << "=======================================================" << endl;
+        waitForEnter();
+        return true;
+    } else {
+        cout << "Username sudah ada. Silakan pilih username lain." << endl;
+        cout << "=======================================================" << endl;
+        waitForEnter();
+        return false;
+    }
+}
+
+bool loginPengguna(string &penggunaLogin) {
+    string username, password;
+    clearScreen();
+    cout << "=======================================================" << endl;
+    cout << "Login" << endl;
+    cout << "=======================================================" << endl;
+    cout << "Masukkan username: ";
+    cin >> username;
+    cout << "Masukkan password: ";
+    cin >> password;
+    if (pengguna.find(username) != pengguna.end() && pengguna[username] == password) {
+        penggunaLogin = username;
+        cout << "Login berhasil!" << endl;
+        cout << "=======================================================" << endl;
+        waitForEnter();
+        return true;
+    } else {
+        cout << "Username atau password salah." << endl;5
+        cout << "=======================================================" << endl;
+        waitForEnter();
+        return false;
+    }
+}
+
+bool compareFilm(const pair<int, Film>& a, const pair<int, Film>& b) {
+    return a.second.nama < b.second.nama;
+}
+
+void menuAdmin() {
+    int pilihan;
+    do {
+        clearScreen();
+        cout << "=======================================================" << endl;
+        cout << "                  Menu Admin" << endl;
+        cout << "=======================================================" << endl;
+        cout << "1. Tambah/Perbarui Jadwal Film" << endl;
+        cout << "2. Lihat Pemesanan Pengguna" << endl;
+        cout << "3. Kembali" << endl;
+        cout << "Masukkan pilihan Anda: ";
+        cin >> pilihan;
+        cin.ignore(); // Clear the input buffer
+        cout << "=======================================================" << endl;
+
+        switch (pilihan) {
+            case 1: {
+                int id;
+                string nama, waktu;
+                cout << "Masukkan ID film: ";
+                cin >> id;
+                cin.ignore(); 
+                cout << "Masukkan nama film: ";
+                getline(cin, nama);
+                jadwal[id].nama = nama;
+                jadwal[id].jamTayang.clear();
+                cout << "Masukkan jam tayang (ketik 'selesai' untuk selesai): " << endl;
+                while (true) {
+                    cin >> waktu;
+                    if (waktu == "selesai") break;
+                    jadwal[id].jamTayang.push_back(waktu);
+                }
+                cout << "Jadwal film berhasil diperbarui!" << endl;
+                cout << "=======================================================" << endl;
+                waitForEnter();
+                break;
+            }
+            case 2: {
+                for (const auto& p : pemesanan) {
+                    cout << "Pengguna: " << p.first << endl;
+                    for (const auto& pemesanan : p.second) {
+                        cout << pemesanan << endl;
+                    }
+                    cout << "-------------------------------------------------------" << endl;
+                }
+                waitForEnter();
+                break;
+            }
+            case 3:
+                return;
+            default:
+                cout << "Pilihan tidak valid." << endl;
+                waitForEnter();
+        }
+    } while (true);
+}
+
+void pesanTiket(string username) {
+    int film, jam, tiket, total, uang, kurang, kembali;
+
+    vector<pair<int, Film>> sorted_jadwal(jadwal.begin(), jadwal.end());
+    sort(sorted_jadwal.begin(), sorted_jadwal.end(), compareFilm);
+
+    clearScreen();
+    cout << "=======================================================" << endl;
+    cout << "           Film yang Tersedia" << endl;
+    cout << "=======================================================" << endl;
+    for (const auto &pair : sorted_jadwal) {
+        cout << pair.first << ". " << pair.second.nama << endl;
+    }
+    cout << "=======================================================" << endl;
+    cout << "Pilih film: ";
+    cin >> film;
+
+    if (jadwal.find(film) == jadwal.end()) {
+        cout << "         Pilihan film tidak valid." << endl;
+        cout << "=======================================================" << endl;
+        waitForEnter();
+        return;
+    }
+
+    Film &filmTerpilih = jadwal[film];
+    clearScreen();
+    cout << "Jam tayang untuk " << filmTerpilih.nama << ": " << endl;
+    for (int i = 0; i < filmTerpilih.jamTayang.size(); i++) {
+        cout << i + 1 << ". " << filmTerpilih.jamTayang[i] << endl;
+    }
+    cout << "Pilih jam tayang: ";
+    cin >> jam;
+
+    if (jam < 1 || jam > filmTerpilih.jamTayang.size()) {
+        cout << "      Pilihan jam tayang tidak valid." << endl;
+        cout << "=======================================================" << endl;
+        waitForEnter();
+        return;
+    }
+
+    clearScreen();
+    cout << "=======================================================" << endl;
+    tampilkanKursi(filmTerpilih.kursi);
+
+    cout << "Pilih kursi (misal: A1, B3, C17): ";
+    char row;
+    int col;
+    cin >> row >> col;
+    int rowIndex = row - 'A';
+    int colIndex = col - 1;
+
+    while (rowIndex < 0 || rowIndex >= ROWS || colIndex < 0 || colIndex >= COLS || filmTerpilih.kursi[rowIndex][colIndex] == 1) {
+        if (filmTerpilih.kursi[rowIndex][colIndex] == 1) {
+            cout << "Kursi sudah ditempati, pilih kursi lain: ";
+        } else {
+            cout << "Nomor kursi tidak valid, pilih antara A1 hingga L17: ";
+        }
+        cin >> row >> col;
+        rowIndex = row - 'A';
+        colIndex = col - 1;
+    }
+
+    filmTerpilih.kursi[rowIndex][colIndex] = 1;
+
+    cout << "Berapa tiket yang akan Anda beli? ";
+    cin >> tiket;
+    total = tiket * 30000;
+    cout << "Total harga: Rp " << total << endl;
+    cout << "Masukkan uang: ";
+    cin >> uang;
+
+    while (uang < total) {
+        kurang = total - uang;
+        cout << "Uang Anda kurang Rp " << kurang << endl;
+        cout << "Masukkan uang tambahan: ";
+        cin >> uang;
+    }
+
+    kembali = uang - total;
+    cout << "Kembalian: Rp " << kembali << endl;
+    cout << "Tiket berhasil dipesan!" << endl;
+
+    stringstream ss;
+    ss << filmTerpilih.nama << " " << filmTerpilih.jamTayang[jam - 1] << " Kursi " << row << col;
+    pemesanan[username].push_back(ss.str());
+
+    // Print the ticket receipt
+    clearScreen();
+    cout << "=======================================================" << endl;
+    cout << "             Struk Pemesanan" << endl;
+    cout << "=======================================================" << endl;
+    cout << setw(20) << "Username" << " : " << username << endl;
+    cout << setw(20) << "Film" << " : " << filmTerpilih.nama << endl;
+    cout << setw(20) << "Jam tayang" << " : " << filmTerpilih.jamTayang[jam - 1] << endl;
+    cout << setw(20) << "Kursi" << " : " << row << col << endl;
+    cout << setw(20) << "Jumlah Tiket" << " : " << tiket << endl;
+    cout << setw(20) << "Total Biaya" << " : " << total << endl;
+    cout << setw(20) << "Uang yang Dibayarkan" << " : " << uang << endl;
+    cout << setw(20) << "Kembalian" << " : " << kembali << endl;
+    cout << "=======================================================" << endl;
+    cout << "Barcode: |||||||||||||" << endl;
+    cout << "ID Resi: " << rand() % 1000000 << endl; // Generate a random receipt ID
+    cout << "=======================================================" << endl;
+
+    waitForEnter();
+}
+
+int main() {
+    inisialisasiJadwal();
+    inisialisasiPengguna();
+
+    int pilihan;
+    string penggunaLogin;
+    bool loggedIn = false;
+
+    do {
+        clearScreen();
+        cout << "=======================================================" << endl;
+        cout << "           Pemesanan Tiket Bioskop MIN21" << endl;
+        cout << "=======================================================" << endl;
+        cout << "1. Sign up" << endl;
+        cout << "2. Login pengguna" << endl;
+        cout << "3. Login Admin" << endl;
+        cout << "4. Logout" << endl;
+        cout << "Masukkan pilihan Anda: ";
+        cin >> pilihan;
+        cin.ignore(); // Clear the input buffer
+        cout << "=======================================================" << endl;
+
+        switch (pilihan) {
+            case 1:
+                daftarPengguna();
+                break;
+            case 2:
+                loggedIn = loginPengguna(penggunaLogin);
+                if (loggedIn) {
+                    int pilihanUser;
+                    do {
+                        clearScreen();
+                        cout << "=======================================================" << endl;
+                        cout << "                       WELCOME, " << penggunaLogin << endl;
+                        cout << "=======================================================" << endl;
+                        cout << "1. Pesan Tiket" << endl;
+                        cout << "2. Logout" << endl;
+                        cout << "Masukkan pilihan Anda: ";
+                        cin >> pilihanUser;
+                        cout << "=======================================================" << endl;
+
+                        switch (pilihanUser) {
+                            case 1:
+                                pesanTiket(penggunaLogin);
+                                break;
+                            case 2:
+                                loggedIn = false;
+                                penggunaLogin.clear();
+                                break;
+                            default:
+                                cout << "Pilihan tidak valid." << endl;
+                                waitForEnter();
+                        }
+                    } while (loggedIn);
+                }
+                break;
+            case 3: {
+                string adminUser, adminPass;
+                cout << "Masukkan username admin: ";
+                cin >> adminUser;
+                cout << "Masukkan password admin: ";
+                cin >> adminPass;
+                if (pengguna.find(adminUser) != pengguna.end() && pengguna[adminUser] == adminPass) {
+                    menuAdmin();
+                } else {
+                    cout << "Username atau password admin salah." << endl;
+                    waitForEnter();
+                }
+                break;
+            }
+            case 4:
+                cout << "Terima kasih telah menggunakan sistem kami. Selamat tinggal!" << endl;
+                break;
+            default:
+                cout << "Pilihan tidak valid." << endl;
+                waitForEnter();
+        }
+    } while (pilihan != 4);
+
+    return 0;
+}
