@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <sstream>
 #include <algorithm>
+#include <cstdlib> 
 
 using namespace std;
 
@@ -28,7 +29,9 @@ struct Film {
         }
     }
 };
+
 unordered_map<int, Film> jadwal;
+
 void inisialisasiJadwal() {
     jadwal[1] = Film("Haikyu!! The Dumpster Battle", {"13:25", "15:05", "16:45", "18:25"});
     jadwal[2] = Film("How to Make Millions Before Grandma Dies", {"13:05", "15:30", "17:55", "20:20"});
@@ -38,7 +41,8 @@ void inisialisasiJadwal() {
 }
 
 void inisialisasiPengguna() {
-    pengguna["admin"] = "admin123"; 
+    pengguna["admin"] = "admin123";
+}
 
 void clearScreen() {
 #ifdef _WIN32
@@ -116,7 +120,7 @@ bool loginPengguna(string &penggunaLogin) {
         waitForEnter();
         return true;
     } else {
-        cout << "Username atau password salah." << endl;5
+        cout << "Username atau password salah." << endl;
         cout << "=======================================================" << endl;
         waitForEnter();
         return false;
@@ -228,28 +232,33 @@ void pesanTiket(string username) {
     cout << "=======================================================" << endl;
     tampilkanKursi(filmTerpilih.kursi);
 
-    cout << "Pilih kursi (misal: A1, B3, C17): ";
-    char row;
-    int col;
-    cin >> row >> col;
-    int rowIndex = row - 'A';
-    int colIndex = col - 1;
-
-    while (rowIndex < 0 || rowIndex >= ROWS || colIndex < 0 || colIndex >= COLS || filmTerpilih.kursi[rowIndex][colIndex] == 1) {
-        if (filmTerpilih.kursi[rowIndex][colIndex] == 1) {
-            cout << "Kursi sudah ditempati, pilih kursi lain: ";
-        } else {
-            cout << "Nomor kursi tidak valid, pilih antara A1 hingga L17: ";
-        }
-        cin >> row >> col;
-        rowIndex = row - 'A';
-        colIndex = col - 1;
-    }
-
-    filmTerpilih.kursi[rowIndex][colIndex] = 1;
-
     cout << "Berapa tiket yang akan Anda beli? ";
     cin >> tiket;
+    vector<pair<char, int>> kursiDipilih;
+
+    for (int i = 0; i < tiket; ++i) {
+        cout << "Pilih kursi " << i + 1 << " (misal: A1, B3, C17): ";
+        char row;
+        int col;
+        cin >> row >> col;
+        int rowIndex = row - 'A';
+        int colIndex = col - 1;
+
+        while (rowIndex < 0 || rowIndex >= ROWS || colIndex < 0 || colIndex >= COLS || filmTerpilih.kursi[rowIndex][colIndex] == 1) {
+            if (filmTerpilih.kursi[rowIndex][colIndex] == 1) {
+                cout << "Kursi sudah ditempati, pilih kursi lain: ";
+            } else {
+                cout << "Nomor kursi tidak valid, pilih antara A1 hingga L17: ";
+            }
+            cin >> row >> col;
+            rowIndex = row - 'A';
+            colIndex = col - 1;
+        }
+
+        filmTerpilih.kursi[rowIndex][colIndex] = 1;
+        kursiDipilih.push_back({row, col});
+    }
+
     total = tiket * 30000;
     cout << "Total harga: Rp " << total << endl;
     cout << "Masukkan uang: ";
@@ -266,11 +275,12 @@ void pesanTiket(string username) {
     cout << "Kembalian: Rp " << kembali << endl;
     cout << "Tiket berhasil dipesan!" << endl;
 
-    stringstream ss;
-    ss << filmTerpilih.nama << " " << filmTerpilih.jamTayang[jam - 1] << " Kursi " << row << col;
-    pemesanan[username].push_back(ss.str());
+    for (const auto& k : kursiDipilih) {
+        stringstream ss;
+        ss << filmTerpilih.nama << " " << filmTerpilih.jamTayang[jam - 1] << " Kursi " << k.first << k.second;
+        pemesanan[username].push_back(ss.str());
+    }
 
-    // Print the ticket receipt
     clearScreen();
     cout << "=======================================================" << endl;
     cout << "             Struk Pemesanan" << endl;
@@ -278,7 +288,9 @@ void pesanTiket(string username) {
     cout << setw(20) << "Username" << " : " << username << endl;
     cout << setw(20) << "Film" << " : " << filmTerpilih.nama << endl;
     cout << setw(20) << "Jam tayang" << " : " << filmTerpilih.jamTayang[jam - 1] << endl;
-    cout << setw(20) << "Kursi" << " : " << row << col << endl;
+    for (const auto& k : kursiDipilih) {
+        cout << setw(20) << "Kursi" << " : " << k.first << k.second << endl;
+    }
     cout << setw(20) << "Jumlah Tiket" << " : " << tiket << endl;
     cout << setw(20) << "Total Biaya" << " : " << total << endl;
     cout << setw(20) << "Uang yang Dibayarkan" << " : " << uang << endl;
